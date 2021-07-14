@@ -12,7 +12,7 @@ const GlobalStyle = createGlobalStyle`
 
   body {
     font-family: sans-serif;
-    background-color: #D9E6F6;
+    background-image: url(https://i.pinimg.com/originals/54/dd/2a/54dd2a6c17f894e233848e18eaa242d9.jpg);
   }
 
   #__next {
