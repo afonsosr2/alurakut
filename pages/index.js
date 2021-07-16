@@ -33,7 +33,7 @@ function ProfileRelationsBox(propriedades) {
         {propriedades.items.map((itemAtual) => {
           return (
             <li key={itemAtual.id}>
-              <a href={itemAtual.url}>
+              <a href={`https://github.com/${itemAtual.login}`}>
                 <img src={itemAtual.avatar_url} />
                 <span>{itemAtual.login}</span>
               </a>
