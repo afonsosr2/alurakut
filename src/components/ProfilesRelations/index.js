@@ -13,6 +13,7 @@ export const ProfileRelationsBoxWrapper = styled(Box)`
     grid-template-columns: 1fr 1fr 1fr; 
     max-height: 220px;
     list-style: none;
+    overflow: hidden;
   }
   img {
     object-fit: cover;
@@ -20,6 +21,12 @@ export const ProfileRelationsBoxWrapper = styled(Box)`
     width: 100%;
     height: 100%;
     position: relative;
+  }
+  .verMais {
+    font-size: 12px;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: 800;
   }
   ul li a {
     display: inline-block;

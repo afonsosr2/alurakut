@@ -30,17 +30,18 @@ function ProfileRelationsBox(propriedades) {
         {propriedades.title} ({propriedades.items.length})
       </h2>
       <ul>
-        {/* {seguidores.map((itemAtual) => {
+        {propriedades.items.map((itemAtual) => {
           return (
-            <li key={itemAtual}>
-              <a href={`https://github.com/${itemAtual}.png`}>
-                <img src={itemAtual.image} />
-                <span>{itemAtual.title}</span>
+            <li key={itemAtual.id}>
+              <a href={itemAtual.url}>
+                <img src={itemAtual.avatar_url} />
+                <span>{itemAtual.login}</span>
               </a>
             </li>
           )
-        })} */}
+        })}
       </ul>
+      <a className="verMais" href="#">Ver mais</a>
     </ProfileRelationsBoxWrapper>
   )
 }
@@ -50,17 +51,13 @@ export default function Home() {
   const [comunidades, setComunidades] = React.useState([]);
   // const comunidades = posição[0]; e const setComunidades = posição[1];
 
-  const pessoasFavoritas = [
-    'afonsosr2',
-    'juunegreiros',
-    'omariosouto',
-    'peas',
-    'MonicaHillman',
-    'jeniblodev',
-  ]
+  const [pessoasFavoritas, setPessoasFavoritas] = React.useState([]);
+  // const pessoasFavoritas = posição[0]; e const pessoasFavoritas = posição[1];
 
   const [seguidores, setSeguidores] = React.useState([]);
-  // 0 - Pegar o array de dados do github 
+   // const seguidores = posição[0]; e const seguidores = posição[1];
+
+  // Pegando o array de dados dos meus seguidores do Github 
   React.useEffect(function() {
     // GET
     fetch('https://api.github.com/users/afonsosr2/followers')
@@ -71,7 +68,14 @@ export default function Home() {
       setSeguidores(respostaCompleta);
     })
 
-    console.log('seguidores antes do return', seguidores);
+    // Pegando o array de dados de quem sigo no Github 
+    fetch('https://api.github.com/users/afonsosr2/following')
+    .then(function (respostaDoServidor) {
+      return respostaDoServidor.json();
+    })
+    .then(function(respostaCompleta) {
+      setPessoasFavoritas(respostaCompleta);
+    })
 
     // API GraphQL
     fetch('https://graphql.datocms.com/', {
@@ -85,7 +89,7 @@ export default function Home() {
         allCommunities {
           id
           title
-          imagemUrl
+          imageUrl
           link
           creatorSlug
         }
@@ -94,14 +98,11 @@ export default function Home() {
     .then((response) => response.json()) // .then(function (response) { return response.json() }) // Pega o retorno do response.json() e já retorna        
     .then((respostaCompleta) => {
       const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
-      console.log(comunidadesVindasDoDato)
+      // console.log(comunidadesVindasDoDato)
       setComunidades(comunidadesVindasDoDato)
     })
     
   }, [])
-
-  // 1 - Criar um box que vai ter um map, baseado nos items do array
-  // que pegamos do GitHub
   
   return (
     <>
@@ -125,32 +126,27 @@ export default function Home() {
             e.preventDefault();
 
             const dadosDoForm = new FormData(e.target);
+            const comunidade = {
+              title: dadosDoForm.get('title'),
+              imageUrl: dadosDoForm.get('image'),
+              link: dadosDoForm.get('link'),
+              creatorSlug: usuarioAleatorio,
+            }
 
-                console.log('Campo: ', dadosDoForm.get('title'));
-                console.log('Campo: ', dadosDoForm.get('image'));
-                console.log('Campo: ', dadosDoForm.get('link'));
-
-                const comunidade = {
-                  title: dadosDoForm.get('title'),
-                  imageUrl: dadosDoForm.get('image'),
-                  link: dadosDoForm.get('link'),
-                  creatorSlug: usuarioAleatorio,
-                }
-
-                fetch('/api/comunidades', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(comunidade)
-                })
-                .then(async (response) => {
-                  const dados = await response.json();
-                  console.log(dados.registroCriado);
-                  const comunidade = dados.registroCriado;
-                  const comunidadesAtualizadas = [...comunidades, comunidade];
-                  setComunidades(comunidadesAtualizadas)
-                })
+            fetch('/api/comunidades', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(comunidade)
+            })
+            .then(async (response) => {
+              const dados = await response.json();
+              console.log(dados.registroCriado);
+              const comunidade = dados.registroCriado;
+              const comunidadesAtualizadas = [...comunidades, comunidade];
+              setComunidades(comunidadesAtualizadas)
+            })
           }}>
             <div>
               <input 
@@ -184,25 +180,11 @@ export default function Home() {
         </Box>
       </div>
       <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
+      
+      {/* Criando o box que vai ter o map, baseado nos items do array que pegamos do GitHub */}      
       <ProfileRelationsBox title="Seguidores" items={seguidores} />
-      <ProfileRelationsBoxWrapper> 
-        <h2 className="smallTitle">
-          Pessoas da comunidade ({pessoasFavoritas.length})
-        </h2>
-
-        <ul>
-          {pessoasFavoritas.map((itemAtual) => {
-            return (
-              <li key={itemAtual}>
-                <a href={`/users/${itemAtual}`}>
-                  <img src={`https://github.com/${itemAtual}.png`} />
-                  <span>{itemAtual}</span>
-                </a>
-              </li>
-            )
-          })}
-        </ul>
-      </ProfileRelationsBoxWrapper>  
+      <ProfileRelationsBox title="Seguindo" items={pessoasFavoritas} /> 
+      {/* Exibindo as comunidades, baseado nos items do array que pegamos do Dato + a que adicionamos no site*/}
       <ProfileRelationsBoxWrapper> 
         <h2 className="smallTitle">
           Minhas comunidades ({comunidades.length})
@@ -220,6 +202,7 @@ export default function Home() {
             )
           })}
         </ul>
+        <a className="verMais" href="#">Ver mais</a>
       </ProfileRelationsBoxWrapper>   
     </div>   
     </MainGrid>
